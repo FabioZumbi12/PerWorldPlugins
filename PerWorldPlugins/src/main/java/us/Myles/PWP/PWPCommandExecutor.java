@@ -18,7 +18,7 @@ public class PWPCommandExecutor implements CommandExecutor {
 					sender.sendMessage(Plugin.color("&a[&2PWP&a] &fPerWorldPlugins successfully reloaded!"));
 					if (sender instanceof Player){
 						Player p = (Player) sender;
-						p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+						p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
 					}
 				}else
 				if (args[0].equalsIgnoreCase("version")) {

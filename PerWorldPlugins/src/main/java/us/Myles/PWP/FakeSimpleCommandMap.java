@@ -1,5 +1,6 @@
 package us.Myles.PWP;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
@@ -13,7 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Java15Compat;
 
 public class FakeSimpleCommandMap extends SimpleCommandMap {
 	public SimpleCommandMap oldMap;
@@ -23,7 +23,7 @@ public class FakeSimpleCommandMap extends SimpleCommandMap {
 		super(Bukkit.getServer());
 		oldMap = oldCommandMap;
 		// Lazy mode activated!
-		Class c = oldMap.getClass();
+		Class<?> c = oldMap.getClass();
 		if(oldMap instanceof FakeSimpleCommandMap)
 			c = c.getSuperclass();
 		for (Field f : c.getDeclaredFields()) {
@@ -38,7 +38,7 @@ public class FakeSimpleCommandMap extends SimpleCommandMap {
 		}
 	}
 
-	private void transferValue(String field, SimpleCommandMap oldMap, Class c) {
+	private void transferValue(String field, SimpleCommandMap oldMap, Class<?> c) {
 		try {
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
@@ -90,9 +90,9 @@ public class FakeSimpleCommandMap extends SimpleCommandMap {
 							"%player%", p.getName()).replace("%plugin%", plugin.getName()).replace("&",
 							ChatColor.COLOR_CHAR + ""));
 					return true;
-				}
+				}				
 			}
-			target.execute(sender, sentCommandLabel, (String[]) Java15Compat.Arrays_copyOfRange(args, 1, args.length));
+			target.execute(sender, sentCommandLabel, Arrays_copyOfRange(args, 1, args.length));
 		} catch (CommandException ex) {
 			throw ex;
 		} catch (Throwable ex) {
@@ -100,4 +100,20 @@ public class FakeSimpleCommandMap extends SimpleCommandMap {
 		}
 		return true;
 	}
+	
+	@SuppressWarnings("unchecked")
+    public static <T> T[] Arrays_copyOfRange(T[] original, int start, int end) {
+        if (original.length >= start && 0 <= start) {
+            if (start <= end) {
+                int length = end - start;
+                int copyLength = Math.min(length, original.length - start);
+                T[] copy = (T[]) Array.newInstance(original.getClass().getComponentType(), length);
+
+                System.arraycopy(original, start, copy, 0, copyLength);
+                return copy;
+            }
+            throw new IllegalArgumentException();
+        }
+        throw new ArrayIndexOutOfBoundsException();
+    }
 }
